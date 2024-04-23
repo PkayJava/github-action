@@ -61,12 +61,16 @@ jobs:
       - name: List output of build directory
         run: ls -l ./build/libs/
 
+      - name: Get JAR file path
+        id: jar_path
+        run: echo "::set-output name=jar_file::$(ls ./build/libs/*.jar)"
+
       - name: Upload JAR File to Release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/libs/*.jar
-          asset_name: application.jar
+          asset_path: ${{ steps.jar_path.outputs.jar_file }}
+          asset_name: ${{ steps.jar_path.outputs.jar_file }}
           asset_content_type: application/java-archive
