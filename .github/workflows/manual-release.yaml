@@ -10,9 +10,9 @@ on:
         description: 'Release Name'
         required: true
       release_body:
-        description: 'Release Description'
+        description: 'Release Description (Use \\n for new lines)'
         required: false
-        default: 'Release details'
+        default: 'Initial Release Details\\nAdditional Details on Second Line'
 
 permissions:
   contents: write  # This allows the workflow to push code to your repository
@@ -42,6 +42,10 @@ jobs:
 
       - name: Push Tag to Repository
         run: git push origin ${{ github.event.inputs.tag_name }}
+
+      - name: Process Release Description
+        id: process_description
+        run: echo "::set-output name=body::$(echo '${{ github.event.inputs.release_body }}' | sed 's/\\n/\n/g')"
 
       - name: Create Release
         id: create_release
