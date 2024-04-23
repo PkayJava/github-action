@@ -12,7 +12,7 @@ on:
       release_body:
         description: 'Release Description (Use \\n for new lines)'
         required: false
-        default: 'Initial Release Details\\nAdditional Details on Second Line'
+        default: 'Detailed description here\\nFurther details follow here'
 
 permissions:
   contents: write  # This allows the workflow to push code to your repository
@@ -55,9 +55,29 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.tag_name }}
           release_name: ${{ github.event.inputs.release_name }}
-          body: ${{ steps.process_description.outputs.body }}
+          body: ${{ github.event.inputs.release_body }}
           draft: false
           prerelease: false
+
+      - name: Replace newlines in release description
+        run: |
+          BODY="${{ github.event.inputs.release_body }}"
+          BODY="${BODY//'\\n'/$'\n'}"
+          echo "Processed body: $BODY"
+          echo "::set-output name=body::$BODY"
+        id: format_body
+
+      - name: Update Release Description
+        uses: actions/github-script@0.9.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = await github.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: ${{ steps.create_release.outputs.id }},
+              body: "${{ steps.format_body.outputs.body }}"
+            });
 
       - name: Build with Gradle
         run: ./gradlew clean bootJar
