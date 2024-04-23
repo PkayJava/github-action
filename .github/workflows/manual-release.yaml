@@ -55,7 +55,7 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.tag_name }}
           release_name: ${{ github.event.inputs.release_name }}
-          body: ${{ github.event.inputs.release_body }}
+          body: ${{ steps.process_description.outputs.body }}
           draft: false
           prerelease: false
 
