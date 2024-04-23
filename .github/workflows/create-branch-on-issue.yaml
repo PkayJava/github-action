@@ -1,0 +1,24 @@
+name: Create Branch on Issue Creation
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  create-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create new branch
+        run: |
+          ISSUE_ID=${{ github.event.issue.number }}
+          BRANCH_NAME="issue-${ISSUE_ID}"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git fetch
+          git branch $BRANCH_NAME
+          git push origin $BRANCH_NAME
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
